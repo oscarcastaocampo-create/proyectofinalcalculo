@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Modelo Tema 7 | Flujo y congestión</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+:root {
+    --bg: #081321;
+    --panel: #101f33;
+    --text: #edf5ff;
+    --muted: #9eb2c9;
+    --cyan: #50d6e8;
+    --blue: #6e9cff;
+    --green: #58d6a3;
+    --orange: #ffbd69;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    margin: 0;
+    background: radial-gradient(ellipse at 15% 0%, #17365a 0, transparent 38%), var(--bg);
+    color: var(--text);
+    font-family: Arial, sans-serif;
+    line-height: 1.55;
+}
+
+.wrap {
+    width: min(1180px, 92%);
+    margin: auto;
+}
+
+header {
+    padding: 22px 0;
+    border-bottom: 1px solid rgba(180,210,245,.13);
+    display: flex;
+    justify-content: space-between;
+}
+
+.brand {
+    font-weight: bold;
+    color: var(--cyan);
+}
+
+nav a {
+    color: var(--muted);
+    text-decoration: none;
+    margin-left: 18px;
+}
+
+.hero {
+    padding: 65px 0;
+    display: grid;
+    grid-template-columns: 1.4fr .8fr;
+    gap: 35px;
+}
+
+.hero h1 {
+    font-size: clamp(2.5rem, 5vw, 4.5rem);
+    line-height: 1.05;
+}
+
+.hero p {
+    color: var(--muted);
+    font-size: 1.05rem;
+}
+
+.card, .metric, .hero-card {
+    background: linear-gradient(145deg, #19304b, #0d1d30);
+    border: 1px solid rgba(180,210,245,.13);
+    border-radius: 18px;
+    padding: 22px;
+}
+
+.formula {
+    font: 1.4rem Georgia, serif;
+    padding: 15px 0;
+    border-bottom: 1px solid rgba(180,210,245,.13);
+}
+
+.formula small {
+    display: block;
+    color: var(--muted);
+    font: .8rem Arial;
+}
+
+button {
+    border: none;
+    border-radius: 9px;
+    padding: 12px 18px;
+    background: var(--cyan);
+    color: #06202c;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+button:hover {
+    opacity: .85;
+}
+
+section {
+    padding: 30px 0;
+}
+
+h2 {
+    font-size: 1.8rem;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+}
+
+.metric span {
+    color: var(--muted);
+}
+
+.metric strong {
+    display: block;
+    font-size: 2rem;
+    margin-top: 8px;
+}
+
+.layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 17px;
+}
+
+.chartbox {
+    height: 290px;
+}
+
+.controls {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+}
+
+.control {
+    padding: 13px;
+    background: rgba(255,255,255,.035);
+    border-radius: 12px;
+}
+
+.control label {
+    display: flex;
+    justify-content: space-between;
+    color: var(--muted);
+    margin-bottom: 8px;
+}
+
+.control input {
+    width: 100%;
+    accent-color: var(--cyan);
+}
+
+.control output {
+    color: var(--cyan);
+    font-weight: bold;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+}
+
+th, td {
+    padding: 12px;
+    text-align: center;
+    border-bottom: 1px solid rgba(180,210,245,.13);
+}
+
+th {
+    color: var(--cyan);
+}
+
+.note {
+    border-left: 3px solid var(--orange);
+    padding: 14px;
+    background: rgba(255,189,105,.07);
+    border-radius: 8px;
+}
+
+footer {
+    padding: 30px 0;
+    border-top: 1px solid rgba(180,210,245,.13);
+    color: var(--muted);
+    margin-top: 35px;
+}
+
+@media(max-width:800px) {
+    .hero, .layout {
+        grid-template-columns: 1fr;
+    }
+
+    .grid {
+        grid-template-columns: 1fr;
+    }
+
+    nav {
+        display: none;
+    }
+}
+
+@media(max-width:480px) {
+    .controls {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<header class="wrap">
+    <div class="brand">PROYECTO FINAL · CÁLCULO DIFERENCIAL</div>
+
+    <nav>
+        <a href="#radial">Modelo radial</a>
+        <a href="#cola">Congestión</a>
+        <a href="#metodo">Metodología</a>
+    </nav>
+</header>
+
+<main class="wrap">
+
+<section class="hero">
+    <div>
+        <h1>Flujo radial<br>y congestión</h1>
+
+        <p>
+            Simulación interactiva de un modelo radial equivalente
+            tipo Poiseuille y un sistema de congestión mediante
+            una cola M/M/1/K.
+        </p>
+
+        <button onclick="document.getElementById('radial').scrollIntoView()">
+            Explorar simulación
+        </button>
+    </div>
+
+    <div class="hero-card">
+        <h3>ECUACIONES PRINCIPALES</h3>
+
+        <div class="formula">
+            v(r) = G(R²-r²)/4μ
+            <small>Perfil radial de velocidad</small>
+        </div>
+
+        <div class="formula">
+            Pₖ = ρᵏ / Σρʲ
+            <small>Probabilidad de bloqueo</small>
+        </div>
+    </div>
+</section>
+
+<section>
+    <h2>Resumen del sistema</h2>
+
+    <div class="grid">
+        <div class="metric">
+            <span>Velocidad máxima equivalente</span>
+            <strong id="mV">1.000</strong>
+        </div>
+
+        <div class="metric">
+            <span>Utilización del enlace</span>
+            <strong id="mRho">0.950</strong>
+        </div>
+
+        <div class="metric">
+            <span>Probabilidad de bloqueo</span>
+            <strong id="mP">—</strong>
+        </div>
+    </div>
+</section>
+
+<section id="radial">
+
+    <h2>01. Modelo radial tipo Poiseuille</h2>
+
+    <p>
+        El modelo representa la distribución de velocidad
+        a través de una sección radial.
+    </p>
+
+    <div class="layout">
+
+        <div class="card">
+            <h3>Perfil de velocidad</h3>
+            <div class="chartbox">
+                <canvas id="velocityChart"></canvas>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3>Primera derivada</h3>
+            <div class="chartbox">
+                <canvas id="derivativeChart"></canvas>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="card" style="margin-top:20px">
+
+        <h3>Parámetros del modelo radial</h3>
+
+        <div class="controls">
+
+            <div class="control">
+                <label>Gradiente G <output id="Gval">4</output></label>
+                <input id="G" type="range" min=".5" max="8" step=".1" value="4">
+            </div>
+
+            <div class="control">
+                <label>Viscosidad μ <output id="muval">1</output></label>
+                <input id="mu" type="range" min=".2" max="3" step=".05" value="1">
+            </div>
+
+            <div class="control">
+                <label>Radio R <output id="Rval">1</output></label>
+                <input id="R" type="range" min=".5" max="2" step=".05" value="1">
+            </div>
+
+        </div>
+    </div>
+
+</section>
+
+<section id="cola">
+
+    <h2>02. Modelo de congestión M/M/1/K</h2>
+
+    <p>
+        Este modelo permite estudiar la probabilidad de pérdida
+        de paquetes cuando un sistema tiene capacidad limitada.
+    </p>
+
+    <div class="layout">
+
+        <div class="card">
+            <h3>Probabilidad de bloqueo</h3>
+            <div class="chartbox">
+                <canvas id="queueChart"></canvas>
+            </div>
+        </div>
+
+        <div class="card">
+
+            <h3>Parámetros de congestión</h3>
+
+            <div class="controls">
+
+                <div class="control">
+                    <label>Llegadas λ <output id="lambdaval">950</output></label>
+                    <input id="lambda" type="range" min="100" max="1200" step="10" value="950">
+                </div>
+
+                <div class="control">
+                    <label>Servicio μs <output id="serviceval">1000</output></label>
+                    <input id="service" type="range" min="500" max="1500" step="10" value="1000">
+                </div>
+
+                <div class="control">
+                    <label>Capacidad K <output id="Kval">10</output></label>
+                    <input id="K" type="range" min="2" max="30" value="10">
+                </div>
+
+            </div>
+
+            <div class="note" id="interpretation" style="margin-top:20px">
+                Interpretación del escenario.
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="card" style="margin-top:20px">
+
+        <h3>Tabla de escenarios</h3>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>λ</th>
+                    <th>ρ</th>
+                    <th>Bloqueo</th>
+                </tr>
+            </thead>
+
+            <tbody id="scenarioRows"></tbody>
+        </table>
+
+    </div>
+
+</section>
+
+<section id="metodo">
+
+    <h2>03. Interpretación matemática</h2>
+
+    <div class="grid">
+
+        <div class="card">
+            <h3>Perfil radial</h3>
+            <p>
+                La velocidad es máxima en el centro y disminuye
+                progresivamente hasta llegar a cero en la pared.
+            </p>
+        </div>
+
+        <div class="card">
+            <h3>Congestión</h3>
+            <p>
+                La utilización ρ compara la tasa de llegada
+                con la capacidad de servicio del sistema.
+            </p>
+        </div>
+
+        <div class="card">
+            <h3>Probabilidad</h3>
+            <p>
+                La probabilidad de bloqueo representa la posibilidad
+                de que un paquete encuentre el buffer lleno.
+            </p>
+        </div>
+
+    </div>
+
+    <div class="note" style="margin-top:20px">
+        Los parámetros utilizados son ilustrativos y no corresponden
+        a mediciones de una red real. El modelo radial es una analogía
+        matemática adimensional y la cola M/M/1/K es un modelo
+        complementario de congestión.
+    </div>
+
+</section>
+
+</main>
+
+<footer class="wrap">
+    Proyecto final de Cálculo Diferencial · Tema 7
+    <br>
+    Simulación educativa interactiva.
+</footer>
+
+<script>
+
+// CONFIGURACIÓN DE GRÁFICAS
+
+const chartOptions = {
+    responsive: true,
+    maintainAspectRatio: false
+};
+
+const velocityChart = new Chart(
+    document.getElementById('velocityChart'),
+    {
+        type: 'line',
+        data: {
+            labels: [],
+            datasets: [{
+                label: 'Velocidad',
+                data: [],
+                borderColor: '#50d6e8',
+                borderWidth: 3
+            }]
+        },
+        options: chartOptions
+    }
+);
+
+const derivativeChart = new Chart(
+    document.getElementById('derivativeChart'),
+    {
+        type: 'line',
+        data: {
+            labels: [],
+            datasets: [{
+                label: 'Primera derivada',
+                data: [],
+                borderColor: '#6e9cff',
+                borderWidth: 3
+            }]
+        },
+        options: chartOptions
+    }
+);
+
+const queueChart = new Chart(
+    document.getElementById('queueChart'),
+    {
+        type: 'line',
+        data: {
+            labels: [],
+            datasets: [{
+                label: 'Probabilidad de bloqueo (%)',
+                data: [],
+                borderColor: '#58d6a3',
+                borderWidth: 3
+            }]
+        },
+        options: chartOptions
+    }
+);
+
+
+// MODELO RADIAL
+
+function updateRadial() {
+
+    const G = Number(document.getElementById('G').value);
+    const mu = Number(document.getElementById('mu').value);
+    const R = Number(document.getElementById('R').value);
+
+    document.getElementById('Gval').textContent = G;
+    document.getElementById('muval').textContent = mu;
+    document.getElementById('Rval').textContent = R;
+
+    const radios = [];
+    const velocidades = [];
+    const derivadas = [];
+
+    for (let i = 0; i <= 100; i++) {
+
+        const r = R * i / 100;
+
+        const v = G / (4 * mu) * (R * R - r * r);
+
+        const dv = -G * r / (2 * mu);
+
+        radios.push(r.toFixed(2));
+        velocidades.push(v);
+        derivadas.push(dv);
+    }
+
+    velocityChart.data.labels = radios;
+    velocityChart.data.datasets[0].data = velocidades;
+    velocityChart.update();
+
+    derivativeChart.data.labels = radios;
+    derivativeChart.data.datasets[0].data = derivadas;
+    derivativeChart.update();
+
+    document.getElementById('mV').textContent =
+        (G * R * R / (4 * mu)).toFixed(3);
+}
+
+
+// MODELO DE CONGESTIÓN
+
+function blockingProbability(rho, K) {
+
+    if (Math.abs(rho - 1) < 1e-9) {
+        return 1 / (K + 1);
+    }
+
+    if (rho === 0) {
+        return 0;
+    }
+
+    let denominator = 0;
+
+    for (let j = 0; j <= K; j++) {
+        denominator += Math.pow(rho, j);
+    }
+
+    return Math.pow(rho, K) / denominator;
+}
+
+
+function updateQueue() {
+
+    const lambda = Number(document.getElementById('lambda').value);
+    const service = Number(document.getElementById('service').value);
+    const K = Number(document.getElementById('K').value);
+
+    document.getElementById('lambdaval').textContent = lambda;
+    document.getElementById('serviceval').textContent = service;
+    document.getElementById('Kval').textContent = K;
+
+    const rho = lambda / service;
+
+    const probability = blockingProbability(rho, K);
+
+    document.getElementById('mRho').textContent =
+        rho.toFixed(3);
+
+    document.getElementById('mP').textContent =
+        (probability * 100).toFixed(3) + '%';
+
+    document.getElementById('interpretation').innerHTML =
+        'Utilización: <strong>' + rho.toFixed(3) +
+        '</strong>. Probabilidad de bloqueo: <strong>' +
+        (probability * 100).toFixed(3) + '%</strong>.';
+
+    // GENERAR GRÁFICA
+
+    const x = [];
+    const y = [];
+
+    for (let i = 1; i <= 100; i++) {
+
+        const utilization = i / 100;
+
+        x.push(utilization.toFixed(2));
+
+        y.push(blockingProbability(utilization, K) * 100);
+    }
+
+    queueChart.data.labels = x;
+    queueChart.data.datasets[0].data = y;
+    queueChart.update();
+
+    // GENERAR TABLA
+
+    const arrivals = [500, 700, 850, 950, 990];
+
+    let html = '';
+
+    arrivals.forEach(lam => {
+
+        const r = lam / service;
+
+        const p = blockingProbability(r, K);
+
+        html += `
+            <tr>
+                <td>${lam}</td>
+                <td>${r.toFixed(3)}</td>
+                <td>${(p * 100).toFixed(4)}%</td>
+            </tr>
+        `;
+    });
+
+    document.getElementById('scenarioRows').innerHTML = html;
+
+}
+
+
+// ACTUALIZACIÓN AUTOMÁTICA
+
+['G', 'mu', 'R'].forEach(id => {
+    document.getElementById(id).addEventListener('input', updateRadial);
+});
+
+['lambda', 'service', 'K'].forEach(id => {
+    document.getElementById(id).addEventListener('input', updateQueue);
+});
+
+
+// INICIAR SIMULACIÓN
+
+updateRadial();
+updateQueue();
+
+</script>
+
+</body>
+</html>
